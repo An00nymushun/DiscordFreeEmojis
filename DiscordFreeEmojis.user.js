@@ -134,11 +134,12 @@ function Init(nonInvasive)
 }
 
 
+var InitFails = 0;
 function TryInit()
 {
     if(Init(true) !== 0) return;
 
-    window.setTimeout(TryInit, 100);
+    window.setTimeout((++InitFails === 600) ? Init : TryInit, 100);
 };
 
 
