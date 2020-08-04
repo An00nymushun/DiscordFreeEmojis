@@ -2,22 +2,22 @@
 
 /*@cc_on
 @if (@_jscript)
-	var shell = WScript.CreateObject("WScript.Shell");
-	var fs = new ActiveXObject("Scripting.FileSystemObject");
-	var pathPlugins = shell.ExpandEnvironmentStrings("%APPDATA%\\BetterDiscord\\plugins");
-	var pathSelf = WScript.ScriptFullName;
-	shell.Popup("It looks like you've mistakenly tried to run me directly. \\n(Don't do that!)", 0, "I'm a plugin for BetterDiscord", 0x30);
-	if (fs.GetParentFolderName(pathSelf) === fs.GetAbsolutePathName(pathPlugins)) {
-		shell.Popup("I'm in the correct folder already.", 0, "I'm already installed", 0x40);
-	} else if (!fs.FolderExists(pathPlugins)) {
-		shell.Popup("I can't find the BetterDiscord plugins folder.\\nAre you sure it's even installed?", 0, "Can't install myself", 0x10);
-	} else if (shell.Popup("Should I copy myself to BetterDiscord's plugins folder for you?", 0, "Do you need some help?", 0x34) === 6) {
-		fs.CopyFile(pathSelf, fs.BuildPath(pathPlugins, fs.GetFileName(pathSelf)), true);
-		// Show the user where to put plugins in the future
-		shell.Exec("explorer " + pathPlugins);
-		shell.Popup("I'm installed!", 0, "Successfully installed", 0x40);
-	}
-	WScript.Quit();
+    var shell = WScript.CreateObject("WScript.Shell");
+    var fs = new ActiveXObject("Scripting.FileSystemObject");
+    var pathPlugins = shell.ExpandEnvironmentStrings("%APPDATA%\\BetterDiscord\\plugins");
+    var pathSelf = WScript.ScriptFullName;
+    shell.Popup("It looks like you've mistakenly tried to run me directly. \\n(Don't do that!)", 0, "I'm a plugin for BetterDiscord", 0x30);
+    if (fs.GetParentFolderName(pathSelf) === fs.GetAbsolutePathName(pathPlugins)) {
+        shell.Popup("I'm in the correct folder already.", 0, "I'm already installed", 0x40);
+    } else if (!fs.FolderExists(pathPlugins)) {
+        shell.Popup("I can't find the BetterDiscord plugins folder.\\nAre you sure it's even installed?", 0, "Can't install myself", 0x10);
+    } else if (shell.Popup("Should I copy myself to BetterDiscord's plugins folder for you?", 0, "Do you need some help?", 0x34) === 6) {
+        fs.CopyFile(pathSelf, fs.BuildPath(pathPlugins, fs.GetFileName(pathSelf)), true);
+        // Show the user where to put plugins in the future
+        shell.Exec("explorer " + pathPlugins);
+        shell.Popup("I'm installed!", 0, "Successfully installed", 0x40);
+    }
+    WScript.Quit();
 @else @*/
 
 
@@ -105,34 +105,34 @@ function Init(nonInvasive)
     let emojiPickerModule = findModuleByUniqueProperties([ 'useEmojiSelectHandler' ], nonInvasive);
     if(emojiPickerModule == null) { if(!nonInvasive) Utils.Error("emojiPickerModule not found."); return 0; }
 
-	Discord.EmojisModule = emojisModule;
+    Discord.EmojisModule = emojisModule;
     filterExternalHook = Discord.original_filterExternal = emojisModule.filterExternal;
     emojisModule.filterExternal = function() { return filterExternalHook.apply(this, arguments); };
 
     parseHook = Discord.original_parse = messageEmojiParserModule.parse;
     messageEmojiParserModule.parse = function() { return parseHook.apply(this, arguments); };
-	
+
     useEmojiSelectHandlerHook = Discord.original_useEmojiSelectHandler = emojiPickerModule.useEmojiSelectHandler;
     emojiPickerModule.useEmojiSelectHandler = function() { return useEmojiSelectHandlerHook.apply(this, arguments); };
 
     Utils.Log("initialized");
-	Initialized = true;
+    Initialized = true;
 
     return 1;
 }
 
 function Start() {
-	if(!Initialized && Init() !== 1) return;
-	
-	const { EmojisModule, original_parse } = Discord;
-	
-	filterExternalHook = function(guild, query, n) {
+    if(!Initialized && Init() !== 1) return;
+
+    const { EmojisModule, original_parse } = Discord;
+
+    filterExternalHook = function(guild, query, n) {
         let emojis = EmojisModule.getDisambiguatedEmojiContext(guild.guild_id).nameMatchesChain(query);
         if(n > 0) emojis = emojis.take(n);
         return emojis.value();
     }
-	
-	parseHook = function() {
+
+    parseHook = function() {
         let result = original_parse.apply(this, arguments);
         if(result.invalidEmojis.length !== 0) {
             for(let emoji of result.invalidEmojis) {
@@ -142,8 +142,8 @@ function Start() {
         }
         return result;
     };
-	
-	useEmojiSelectHandlerHook = function(args) {
+
+    useEmojiSelectHandlerHook = function(args) {
         const { onSelectEmoji, closePopout } = args;
         return function(data, state) {
             const emoji = data.emoji;
@@ -156,22 +156,22 @@ function Start() {
 }
 
 function Stop() {
-	if(!Initialized) return;
-	
-	filterExternalHook = Discord.original_filterExternal;
-	parseHook = Discord.original_parse;
-	useEmojiSelectHandlerHook = Discord.original_useEmojiSelectHandler;
+    if(!Initialized) return;
+
+    filterExternalHook = Discord.original_filterExternal;
+    parseHook = Discord.original_parse;
+    useEmojiSelectHandlerHook = Discord.original_useEmojiSelectHandler;
 }
 
 return function() { return {
-	getName: () => "DiscordFreeEmojis",
-	getShortName: () => "FreeEmojis",
-	getDescription: () => "Link emojis if you don't have nitro! Type them out or use the emoji picker!",
-	getVersion: () => "1.0",
-	getAuthor: () => "An0",
-	
-	start: Start,
-	stop: Stop
+    getName: () => "DiscordFreeEmojis",
+    getShortName: () => "FreeEmojis",
+    getDescription: () => "Link emojis if you don't have nitro! Type them out or use the emoji picker!",
+    getVersion: () => "1.0",
+    getAuthor: () => "An0",
+
+    start: Start,
+    stop: Stop
 }};
 
 })();
