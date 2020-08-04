@@ -166,7 +166,7 @@ function Stop() {
 return function() { return {
 	getName: () => "DiscordFreeEmojis",
 	getShortName: () => "FreeEmojis",
-	getDescription: () => "Link emojis if you don't have nitro!",
+	getDescription: () => "Link emojis if you don't have nitro! Type them out or use the emoji picker!",
 	getVersion: () => "1.0",
 	getAuthor: () => "An0",
 	
