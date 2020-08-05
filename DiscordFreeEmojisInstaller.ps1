@@ -1,4 +1,4 @@
-﻿$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Stop"
 
 function AddExtension([string]$electonDataPath) {
 	'adding extension'
@@ -18,7 +18,6 @@ function AddExtension([string]$electonDataPath) {
 function StopProcesses([string]$name) {
 	$targets = Get-Process $name -ErrorAction SilentlyContinue
 	if($targets.Length -eq 0) { return }
-    $needsWait = $false
     try {
 		$targets | Stop-Process
     } catch { "PLEASE CLOSE $name!" }
