@@ -100,6 +100,7 @@ if($install) {
 
 let script = document.createElement('script');
 script.textContent = `
+(()=>{
 'use strict';
 
 const BaseColor = "#0cf";
@@ -224,7 +225,7 @@ function TryInit()
 
 
 TryInit();
-
+})();
 `;
 (document.head||document.documentElement).appendChild(script);
 script.remove();
