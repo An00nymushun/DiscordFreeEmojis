@@ -181,7 +181,7 @@ function Init(nonInvasive)
 
 	const original_filterExternal = emojisModule.filterExternal;
 	emojisModule.filterExternal = function(guild, query, n) {
-		let emojis = emojisModule.getDisambiguatedEmojiContext(guild.guild_id).nameMatchesChain(query);
+		let emojis = emojisModule.getDisambiguatedEmojiContext(guild ? guild.guild_id : null).nameMatchesChain(query);
 		if(n > 0) emojis = emojis.take(n);
 		return emojis.value();
 	}
