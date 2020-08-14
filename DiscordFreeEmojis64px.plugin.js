@@ -127,7 +127,7 @@ function Start() {
     const { EmojisModule, original_parse } = Discord;
 
     filterExternalHook = function(guild, query, n) {
-        let emojis = EmojisModule.getDisambiguatedEmojiContext(guild.guild_id).nameMatchesChain(query);
+        let emojis = EmojisModule.getDisambiguatedEmojiContext(guild ? guild.guild_id : null).nameMatchesChain(query);
         if(n > 0) emojis = emojis.take(n);
         return emojis.value();
     }
@@ -167,7 +167,7 @@ return function() { return {
     getName: () => "DiscordFreeEmojis",
     getShortName: () => "FreeEmojis",
     getDescription: () => "Link emojis if you don't have nitro! Type them out or use the emoji picker!",
-    getVersion: () => "1.0",
+    getVersion: () => "1.1",
     getAuthor: () => "An0",
 
     start: Start,
