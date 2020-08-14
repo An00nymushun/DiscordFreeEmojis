@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DiscordFreeEmojis
 // @namespace    https://gitlab.com/An0/DiscordFreeEmojis
-// @version      1.0
+// @version      1.1
 // @description  Link emojis if you don't have nitro!
 // @author       An0
 // @license      LGPLv3 - https://www.gnu.org/licenses/lgpl-3.0.txt
@@ -99,7 +99,7 @@ function Init(nonInvasive)
 
 	const original_filterExternal = emojisModule.filterExternal;
 	emojisModule.filterExternal = function(guild, query, n) {
-		let emojis = emojisModule.getDisambiguatedEmojiContext(guild.guild_id).nameMatchesChain(query);
+		let emojis = emojisModule.getDisambiguatedEmojiContext(guild ? guild.guild_id : null).nameMatchesChain(query);
 		if(n > 0) emojis = emojis.take(n);
 		return emojis.value();
 	}
