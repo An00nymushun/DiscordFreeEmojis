@@ -136,7 +136,7 @@ function Start() {
         let result = original_parse.apply(this, arguments);
         if(result.invalidEmojis.length !== 0) {
             for(let emoji of result.invalidEmojis) {
-                result.content = result.content.replace(`<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`, emoji.url);
+                result.content = result.content.replace(`<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`, emoji.url+'&size=64');
             }
             result.invalidEmojis = [];
         }
