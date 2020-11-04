@@ -201,7 +201,11 @@ function Init(nonInvasive)
 	const original_useEmojiSelectHandler = emojiPickerModule.useEmojiSelectHandler;
 	emojiPickerModule.useEmojiSelectHandler = function(args) {
 		const { onSelectEmoji, closePopout } = args;
+		const originalHandler = original_useEmojiSelectHandler.apply(this, arguments);
 		return function(data, state) {
+			if(state.toggleFavorite)
+				return originalHandler.apply(this, arguments);
+			
 			const emoji = data.emoji;
 			if(emoji != null && emoji.available) {
 				onSelectEmoji(emoji, state.isFinalSelection);
