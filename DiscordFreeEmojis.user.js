@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DiscordFreeEmojis
 // @namespace    https://gitlab.com/An0/DiscordFreeEmojis
-// @version      1.1
+// @version      1.2
 // @description  Link emojis if you don't have nitro!
 // @author       An0
 // @license      LGPLv3 - https://www.gnu.org/licenses/lgpl-3.0.txt
@@ -89,44 +89,48 @@ function Init(nonInvasive)
     const findModuleByUniqueProperties = (propNames, nonInvasive) => findModule(module => propNames.every(prop => module[prop] !== undefined), nonInvasive);
 
     let emojisModule = findModuleByUniqueProperties([ 'getDisambiguatedEmojiContext', 'filterExternal' ], nonInvasive);
-	if(emojisModule == null) { if(!nonInvasive) Utils.Error("emojisModule not found."); return 0; }
+    if(emojisModule == null) { if(!nonInvasive) Utils.Error("emojisModule not found."); return 0; }
 
-	let messageEmojiParserModule = findModuleByUniqueProperties([ 'parse', 'parsePreprocessor', 'unparse' ], nonInvasive);
-	if(messageEmojiParserModule == null) { if(!nonInvasive) Utils.Error("messageEmojiParserModule not found."); return 0; }
-	
-	let emojiPickerModule = findModuleByUniqueProperties([ 'useEmojiSelectHandler' ], nonInvasive);
-	if(emojiPickerModule == null) { if(!nonInvasive) Utils.Error("emojiPickerModule not found."); return 0; }
+    let messageEmojiParserModule = findModuleByUniqueProperties([ 'parse', 'parsePreprocessor', 'unparse' ], nonInvasive);
+    if(messageEmojiParserModule == null) { if(!nonInvasive) Utils.Error("messageEmojiParserModule not found."); return 0; }
+    
+    let emojiPickerModule = findModuleByUniqueProperties([ 'useEmojiSelectHandler' ], nonInvasive);
+    if(emojiPickerModule == null) { if(!nonInvasive) Utils.Error("emojiPickerModule not found."); return 0; }
 
-	const original_filterExternal = emojisModule.filterExternal;
-	emojisModule.filterExternal = function(guild, query, n) {
-		let emojis = emojisModule.getDisambiguatedEmojiContext(guild ? guild.guild_id : null).nameMatchesChain(query);
-		if(n > 0) emojis = emojis.take(n);
-		return emojis.value();
-	}
+    const original_filterExternal = emojisModule.filterExternal;
+    emojisModule.filterExternal = function(guild, query, n) {
+        let emojis = emojisModule.getDisambiguatedEmojiContext(guild ? guild.guild_id : null).nameMatchesChain(query);
+        if(n > 0) emojis = emojis.take(n);
+        return emojis.value();
+    }
 
-	const original_parse = messageEmojiParserModule.parse;
-	messageEmojiParserModule.parse = function() {
-		let result = original_parse.apply(this, arguments);
-		if(result.invalidEmojis.length !== 0) {
-			for(let emoji of result.invalidEmojis) {
-				result.content = result.content.replace(`<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`, emoji.url);
-			}
-			result.invalidEmojis = [];
-		}
-		return result;
-	};
+    const original_parse = messageEmojiParserModule.parse;
+    messageEmojiParserModule.parse = function() {
+        let result = original_parse.apply(this, arguments);
+        if(result.invalidEmojis.length !== 0) {
+            for(let emoji of result.invalidEmojis) {
+                result.content = result.content.replace(`<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`, emoji.url);
+            }
+            result.invalidEmojis = [];
+        }
+        return result;
+    };
 
-	const original_useEmojiSelectHandler = emojiPickerModule.useEmojiSelectHandler;
-	emojiPickerModule.useEmojiSelectHandler = function(args) {
+    const original_useEmojiSelectHandler = emojiPickerModule.useEmojiSelectHandler;
+    emojiPickerModule.useEmojiSelectHandler = function(args) {
 		const { onSelectEmoji, closePopout } = args;
+		const originalHandler = original_useEmojiSelectHandler.apply(this, arguments);
 		return function(data, state) {
+			if(state.toggleFavorite)
+				return originalHandler.apply(this, arguments);
+			
 			const emoji = data.emoji;
 			if(emoji != null && emoji.available) {
 				onSelectEmoji(emoji, state.isFinalSelection);
 				if(state.isFinalSelection) closePopout();
 			}
 		};
-	};
+    };
 
     Utils.Log("loaded");
 
