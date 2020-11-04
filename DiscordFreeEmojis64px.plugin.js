@@ -101,7 +101,7 @@ function Init(nonInvasive)
 
     let messageEmojiParserModule = findModuleByUniqueProperties([ 'parse', 'parsePreprocessor', 'unparse' ], nonInvasive);
     if(messageEmojiParserModule == null) { if(!nonInvasive) Utils.Error("messageEmojiParserModule not found."); return 0; }
-    
+
     let emojiPickerModule = findModuleByUniqueProperties([ 'useEmojiSelectHandler' ], nonInvasive);
     if(emojiPickerModule == null) { if(!nonInvasive) Utils.Error("emojiPickerModule not found."); return 0; }
 
@@ -124,7 +124,7 @@ function Init(nonInvasive)
 function Start() {
     if(!Initialized && Init() !== 1) return;
 
-    const { EmojisModule, original_parse } = Discord;
+    const { EmojisModule, original_parse, original_useEmojiSelectHandler } = Discord;
 
     filterExternalHook = function(guild, query, n) {
         let emojis = EmojisModule.getDisambiguatedEmojiContext(guild ? guild.guild_id : null).nameMatchesChain(query);
@@ -145,7 +145,11 @@ function Start() {
 
     useEmojiSelectHandlerHook = function(args) {
         const { onSelectEmoji, closePopout } = args;
+        const originalHandler = original_useEmojiSelectHandler.apply(this, arguments);
         return function(data, state) {
+            if(state.toggleFavorite)
+                return originalHandler.apply(this, arguments);
+
             const emoji = data.emoji;
             if(emoji != null && emoji.available) {
                 onSelectEmoji(emoji, state.isFinalSelection);
@@ -166,8 +170,8 @@ function Stop() {
 return function() { return {
     getName: () => "DiscordFreeEmojis",
     getShortName: () => "FreeEmojis",
-    getDescription: () => "Link emojis if you don't have nitro! Type them out or use the emoji picker!",
-    getVersion: () => "1.1",
+    getDescription: () => "Link emojis if you don't have nitro! Type them out or use the emoji picker! [64px]",
+    getVersion: () => "1.2",
     getAuthor: () => "An0",
 
     start: Start,
