@@ -109,7 +109,7 @@ function Init(nonInvasive)
     let emojiPickerModule = findModuleByUniqueProperties([ 'useEmojiSelectHandler' ], nonInvasive);
     if(emojiPickerModule == null) { if(!nonInvasive) Utils.Error("emojiPickerModule not found."); return 0; }
 
-    let channelCacheModule = findModuleByUniqueProperties( [ 'getChannel', 'getChannels', 'getDMFromUserId' ], nonInvasive);
+    let channelCacheModule = findModuleByUniqueProperties( [ 'getChannel', 'getGuildChannels', 'getDMFromUserId' ], nonInvasive);
     if(channelCacheModule == null) Utils.Warn("channelCacheModule not found.");
 
     let messageQueueModule = findModuleByUniqueProperties( [ 'enqueue', 'handleSend', 'handleEdit' ], nonInvasive);
@@ -244,7 +244,7 @@ return function() { return {
     getName: () => "DiscordFreeEmojis",
     getShortName: () => "FreeEmojis",
     getDescription: () => "Link emojis if you don't have nitro! Type them out or use the emoji picker! [Split, 64px]",
-    getVersion: () => "1.2",
+    getVersion: () => "1.2.1",
     getAuthor: () => "An0",
 
     start: Start,
