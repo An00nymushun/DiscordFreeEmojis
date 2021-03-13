@@ -35,7 +35,7 @@ var Utils = {
 };
 
 var Initialized = false;
-var filterExternalHook;
+var searchHook;
 var parseHook;
 var useEmojiSelectHandlerHook;
 function Init(nonInvasive)
@@ -96,7 +96,7 @@ function Init(nonInvasive)
 
     const findModuleByUniqueProperties = (propNames, nonInvasive) => findModule(module => propNames.every(prop => module[prop] !== undefined), nonInvasive);
 
-    let emojisModule = findModuleByUniqueProperties([ 'getDisambiguatedEmojiContext', 'filterExternal' ], nonInvasive);
+    let emojisModule = findModuleByUniqueProperties([ 'getDisambiguatedEmojiContext', 'search' ], nonInvasive);
     if(emojisModule == null) { if(!nonInvasive) Utils.Error("emojisModule not found."); return 0; }
 
     let messageEmojiParserModule = findModuleByUniqueProperties([ 'parse', 'parsePreprocessor', 'unparse' ], nonInvasive);
@@ -106,8 +106,8 @@ function Init(nonInvasive)
     if(emojiPickerModule == null) { if(!nonInvasive) Utils.Error("emojiPickerModule not found."); return 0; }
 
     Discord.EmojisModule = emojisModule;
-    filterExternalHook = Discord.original_filterExternal = emojisModule.filterExternal;
-    emojisModule.filterExternal = function() { return filterExternalHook.apply(this, arguments); };
+    searchHook = Discord.original_search = emojisModule.search;
+    emojisModule.search = function() { return searchHook.apply(this, arguments); };
 
     parseHook = Discord.original_parse = messageEmojiParserModule.parse;
     messageEmojiParserModule.parse = function() { return parseHook.apply(this, arguments); };
@@ -126,10 +126,11 @@ function Start() {
 
     const { EmojisModule, original_parse, original_useEmojiSelectHandler } = Discord;
 
-    filterExternalHook = function(guild, query, n) {
-        let emojis = EmojisModule.getDisambiguatedEmojiContext(guild ? guild.guild_id : null).nameMatchesChain(query);
-        if(n > 0) emojis = emojis.take(n);
-        return emojis.value();
+    searchHook = function() {
+        let result = Discord.original_search.apply(this, arguments);
+        result.unlocked.push(...result.locked);
+        result.locked = [];
+        return result;
     }
 
     parseHook = function() {
@@ -162,7 +163,7 @@ function Start() {
 function Stop() {
     if(!Initialized) return;
 
-    filterExternalHook = Discord.original_filterExternal;
+    searchHook = Discord.original_search;
     parseHook = Discord.original_parse;
     useEmojiSelectHandlerHook = Discord.original_useEmojiSelectHandler;
 }
@@ -171,7 +172,7 @@ return function() { return {
     getName: () => "DiscordFreeEmojis",
     getShortName: () => "FreeEmojis",
     getDescription: () => "Link emojis if you don't have nitro! Type them out or use the emoji picker!",
-    getVersion: () => "1.2",
+    getVersion: () => "1.3",
     getAuthor: () => "An0",
 
     start: Start,
