@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DiscordFreeEmojis
 // @namespace    https://gitlab.com/An0/DiscordFreeEmojis
-// @version      1.2
+// @version      1.3
 // @description  Link emojis if you don't have nitro!
 // @author       An0
 // @license      LGPLv3 - https://www.gnu.org/licenses/lgpl-3.0.txt
@@ -88,7 +88,7 @@ function Init(nonInvasive)
 
     const findModuleByUniqueProperties = (propNames, nonInvasive) => findModule(module => propNames.every(prop => module[prop] !== undefined), nonInvasive);
 
-    let emojisModule = findModuleByUniqueProperties([ 'getDisambiguatedEmojiContext', 'filterExternal' ], nonInvasive);
+    let emojisModule = findModuleByUniqueProperties([ 'getDisambiguatedEmojiContext', 'search' ], nonInvasive);
     if(emojisModule == null) { if(!nonInvasive) Utils.Error("emojisModule not found."); return 0; }
 
     let messageEmojiParserModule = findModuleByUniqueProperties([ 'parse', 'parsePreprocessor', 'unparse' ], nonInvasive);
@@ -97,11 +97,12 @@ function Init(nonInvasive)
     let emojiPickerModule = findModuleByUniqueProperties([ 'useEmojiSelectHandler' ], nonInvasive);
     if(emojiPickerModule == null) { if(!nonInvasive) Utils.Error("emojiPickerModule not found."); return 0; }
 
-    const original_filterExternal = emojisModule.filterExternal;
-    emojisModule.filterExternal = function(guild, query, n) {
-        let emojis = emojisModule.getDisambiguatedEmojiContext(guild ? guild.guild_id : null).nameMatchesChain(query);
-        if(n > 0) emojis = emojis.take(n);
-        return emojis.value();
+    const original_search = emojisModule.search;
+    emojisModule.search = function() {
+        let result = Discord.original_search.apply(this, arguments);
+        result.unlocked.push(...result.locked);
+        result.locked = [];
+        return result;
     }
 
     const original_parse = messageEmojiParserModule.parse;
