@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DiscordFreeEmojis
 // @namespace    https://gitlab.com/An0/DiscordFreeEmojis
-// @version      1.3
+// @version      1.3.0.1
 // @description  Link emojis if you don't have nitro!
 // @author       An0
 // @license      LGPLv3 - https://www.gnu.org/licenses/lgpl-3.0.txt
@@ -99,7 +99,7 @@ function Init(nonInvasive)
 
     const original_search = emojisModule.search;
     emojisModule.search = function() {
-        let result = Discord.original_search.apply(this, arguments);
+        let result = original_search.apply(this, arguments);
         result.unlocked.push(...result.locked);
         result.locked = [];
         return result;
