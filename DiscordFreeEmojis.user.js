@@ -99,7 +99,7 @@ function Init(nonInvasive)
 
     const original_search = emojisModule.search;
     emojisModule.search = function() {
-        let result = Discord.original_search.apply(this, arguments);
+        let result = original_search.apply(this, arguments);
         result.unlocked.push(...result.locked);
         result.locked = [];
         return result;
