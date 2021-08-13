@@ -1,5 +1,9 @@
 //META{"name":"FreeEmojis"}*//
-
+/**
+ * @name DiscordFreeEmojis
+ * @website https://github.com/An00nymushun/DiscordFreeEmojis
+ * @source https://github.com/An00nymushun/DiscordFreeEmojis/blob/master/DiscordFreeEmojis.plugin.js
+ */
 /*@cc_on
 @if (@_jscript)
     var shell = WScript.CreateObject("WScript.Shell");
