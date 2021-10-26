@@ -89,7 +89,7 @@ var Initialized = false;
 var searchHook;
 var parseHook;
 var useEmojiSelectHandlerHook;
-function Init(nonInvasive)
+function Init()
 {
     Discord = { window: (typeof(unsafeWindow) !== 'undefined') ? unsafeWindow : window };
 
