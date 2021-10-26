@@ -127,7 +127,7 @@ function Init()
 				return originalHandler.apply(this, arguments);
 			
 			const emoji = data.emoji;
-			if(emoji != null && emoji.available) {
+			if(emoji != null) {
 				onSelectEmoji(emoji, state.isFinalSelection);
 				if(state.isFinalSelection) closePopout();
 			}
