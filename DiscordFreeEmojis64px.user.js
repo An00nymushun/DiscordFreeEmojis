@@ -5,7 +5,7 @@
 // @description  Link emojis if you don't have nitro!
 // @author       An0
 // @license      LGPLv3 - https://www.gnu.org/licenses/lgpl-3.0.txt
-// @downloadURL  https://gitlab.com/An0/DiscordFreeEmojis/-/raw/master/DiscordFreeEmojis.user.js
+// @downloadURL  https://gitlab.com/An0/DiscordFreeEmojis/-/raw/master/DiscordFreeEmojis64px.user.js
 // @updateURL    https://gitlab.com/An0/DiscordFreeEmojis/-/raw/master/DiscordFreeEmojis.meta.js
 // @match        https://*.discord.com/channels/*
 // @match        https://*.discord.com/activity
