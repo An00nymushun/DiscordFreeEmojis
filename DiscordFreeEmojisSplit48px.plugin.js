@@ -99,7 +99,7 @@ function Init()
 
     const webpackUtil = Utils.Webpack();
     if(webpackUtil == null) { Utils.Error("Webpack not found."); return 0; }
-    const { findModule, findModuleByUniqueProperties } = webpackUtil;
+    const { findModuleByUniqueProperties } = webpackUtil;
 
     let emojisModule = findModuleByUniqueProperties([ 'getDisambiguatedEmojiContext', 'search' ]);
     if(emojisModule == null) { Utils.Error("emojisModule not found."); return 0; }
@@ -116,7 +116,6 @@ function Init()
     let messageQueueModule = findModuleByUniqueProperties( [ 'enqueue', 'handleSend', 'handleEdit' ]);
     if(messageQueueModule == null) Utils.Warn("messageQueueModule not found.");
 
-    Discord.EmojisModule = emojisModule;
     searchHook = Discord.original_search = emojisModule.search;
     emojisModule.search = function() { return searchHook.apply(this, arguments); };
 
@@ -142,23 +141,39 @@ function Init()
 function Start() {
     if(!Initialized && Init() !== 1) return;
 
-    const { EmojisModule, original_parse, original_useEmojiSelectHandler } = Discord;
+    const { original_parse, original_useEmojiSelectHandler } = Discord;
 
     searchHook = function() {
         let result = Discord.original_search.apply(this, arguments);
+
         result.unlocked.push(...result.locked);
         result.locked = [];
         return result;
     }
 
+    function replaceEmoji(parseResult, emoji) {
+        parseResult.content = parseResult.content.replace(`<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`, emoji.url.split("?")[0] + "?size=48");
+    }
+
     parseHook = function() {
         let result = original_parse.apply(this, arguments);
+
         if(result.invalidEmojis.length !== 0) {
             for(let emoji of result.invalidEmojis) {
-                result.content = result.content.replace(`<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`, emoji.url.split("?")[0] + "?size=64");
+                replaceEmoji(result, emoji);
             }
             result.invalidEmojis = [];
         }
+        let validNonShortcutEmojis = result.validNonShortcutEmojis;
+        for (let i = 0; i < validNonShortcutEmojis.length; i++) {
+            const emoji = validNonShortcutEmojis[i];
+            if(!emoji.available) {
+                replaceEmoji(result, emoji);
+                validNonShortcutEmojis.splice(i, 1);
+                i--;
+            }
+        }
+
         return result;
     };
 
@@ -170,6 +185,7 @@ function Start() {
                 return originalHandler.apply(this, arguments);
 
             const emoji = data.emoji;
+
             if(emoji != null) {
                 onSelectEmoji(emoji, state.isFinalSelection);
                 if(state.isFinalSelection) closePopout();
@@ -245,8 +261,8 @@ function Stop() {
 return function() { return {
     getName: () => "DiscordFreeEmojis",
     getShortName: () => "FreeEmojis",
-    getDescription: () => "Link emojis if you don't have nitro! Type them out or use the emoji picker! [Split, 64px]",
-    getVersion: () => "1.4",
+    getDescription: () => "Link emojis if you don't have nitro! Type them out or use the emoji picker! [Split]",
+    getVersion: () => "1.5",
     getAuthor: () => "An0",
 
     start: Start,
