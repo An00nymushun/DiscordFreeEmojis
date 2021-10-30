@@ -106,7 +106,6 @@ function Init()
     let emojiPickerModule = findModuleByUniqueProperties([ 'useEmojiSelectHandler' ]);
     if(emojiPickerModule == null) { Utils.Error("emojiPickerModule not found."); return 0; }
 
-    Discord.EmojisModule = emojisModule;
     searchHook = Discord.original_search = emojisModule.search;
     emojisModule.search = function() { return searchHook.apply(this, arguments); };
 
@@ -125,7 +124,7 @@ function Init()
 function Start() {
     if(!Initialized && Init() !== 1) return;
 
-    const { EmojisModule, original_parse, original_useEmojiSelectHandler } = Discord;
+    const { original_parse, original_useEmojiSelectHandler } = Discord;
 
     searchHook = function() {
         let result = Discord.original_search.apply(this, arguments);
@@ -134,14 +133,29 @@ function Start() {
         return result;
     }
 
+    function replaceEmoji(parseResult, emoji) {
+        parseResult.content = parseResult.content.replace(`<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`, emoji.url.split("?")[0] + "?size=64");
+    }
+
     parseHook = function() {
         let result = original_parse.apply(this, arguments);
+
         if(result.invalidEmojis.length !== 0) {
             for(let emoji of result.invalidEmojis) {
-                result.content = result.content.replace(`<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`, emoji.url.split("?")[0] + "?size=64");
+                replaceEmoji(result, emoji);
             }
             result.invalidEmojis = [];
         }
+        let validNonShortcutEmojis = result.validNonShortcutEmojis;
+        for (let i = 0; i < validNonShortcutEmojis.length; i++) {
+            const emoji = validNonShortcutEmojis[i];
+            if(!emoji.available) {
+                replaceEmoji(result, emoji);
+                validNonShortcutEmojis.splice(i, 1);
+                i--;
+            }
+        }
+
         return result;
     };
 
@@ -173,7 +187,7 @@ return function() { return {
     getName: () => "DiscordFreeEmojis",
     getShortName: () => "FreeEmojis",
     getDescription: () => "Link emojis if you don't have nitro! Type them out or use the emoji picker! [64px]",
-    getVersion: () => "1.4",
+    getVersion: () => "1.5",
     getAuthor: () => "An0",
 
     start: Start,
