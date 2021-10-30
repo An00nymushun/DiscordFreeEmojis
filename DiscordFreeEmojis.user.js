@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DiscordFreeEmojis
 // @namespace    https://gitlab.com/An0/DiscordFreeEmojis
-// @version      1.4.0.1
+// @version      1.5.0.0
 // @description  Link emojis if you don't have nitro!
 // @author       An0
 // @license      LGPLv3 - https://www.gnu.org/licenses/lgpl-3.0.txt
@@ -87,6 +87,7 @@ var Utils = {
     }
 };
 
+
 function Init(final)
 {
     Discord = { window: (typeof(unsafeWindow) !== 'undefined') ? unsafeWindow : window };
@@ -112,15 +113,30 @@ function Init(final)
         return result;
     }
 
+    function replaceEmoji(parseResult, emoji) {
+        parseResult.content = parseResult.content.replace(`<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`, emoji.url.split("?")[0] + "?size=48");
+    }
+	
     const original_parse = messageEmojiParserModule.parse;
     messageEmojiParserModule.parse = function() {
         let result = original_parse.apply(this, arguments);
+
         if(result.invalidEmojis.length !== 0) {
             for(let emoji of result.invalidEmojis) {
-                result.content = result.content.replace(`<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`, emoji.url);
+                replaceEmoji(result, emoji);
             }
             result.invalidEmojis = [];
         }
+        let validNonShortcutEmojis = result.validNonShortcutEmojis;
+        for (let i = 0; i < validNonShortcutEmojis.length; i++) {
+            const emoji = validNonShortcutEmojis[i];
+            if(!emoji.available) {
+                replaceEmoji(result, emoji);
+                validNonShortcutEmojis.splice(i, 1);
+                i--;
+            }
+        }
+
         return result;
     };
 
