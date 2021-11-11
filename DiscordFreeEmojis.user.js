@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         DiscordFreeEmojis
 // @namespace    https://gitlab.com/An0/DiscordFreeEmojis
-// @version      1.5.0.0
+// @version      1.6.0.0
 // @description  Link emojis if you don't have nitro!
 // @author       An0
 // @license      LGPLv3 - https://www.gnu.org/licenses/lgpl-3.0.txt
@@ -96,7 +96,7 @@ function Init(final)
     if(webpackUtil == null) { if(final) Utils.Error("Webpack not found."); return 0; }
     const { findModule, findModuleByUniqueProperties } = webpackUtil;
 
-    let emojisModule = findModuleByUniqueProperties([ 'getDisambiguatedEmojiContext', 'search' ]);
+    let emojisModule = findModuleByUniqueProperties([ 'getDisambiguatedEmojiContext', 'searchWithoutFetchingLatest' ]);
     if(emojisModule == null) { if(final) Utils.Error("emojisModule not found."); return 0; }
 
     let messageEmojiParserModule = findModuleByUniqueProperties([ 'parse', 'parsePreprocessor', 'unparse' ]);
@@ -105,9 +105,9 @@ function Init(final)
     let emojiPickerModule = findModuleByUniqueProperties([ 'useEmojiSelectHandler' ]);
     if(emojiPickerModule == null) { if(final) Utils.Error("emojiPickerModule not found."); return 0; }
 
-    const original_search = emojisModule.search;
-    emojisModule.search = function() {
-        let result = original_search.apply(this, arguments);
+    const original_searchWithoutFetchingLatest = emojisModule.searchWithoutFetchingLatest;
+    emojisModule.searchWithoutFetchingLatest = function() {
+        let result = original_searchWithoutFetchingLatest.apply(this, arguments);
         result.unlocked.push(...result.locked);
         result.locked = [];
         return result;
