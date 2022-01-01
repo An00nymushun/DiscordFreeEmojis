@@ -1,4 +1,11 @@
-//META{"name":"FreeEmojis"}*//
+/**
+ * @name FreeEmojis
+ * @author An0
+ * @version 1.6
+ * @description Link emojis if you don't have nitro! Type them out or use the emoji picker! [64px]
+ * @source https://github.com/An00nymushun/DiscordFreeEmojis
+ * @updateUrl https://raw.githubusercontent.com/An00nymushun/DiscordFreeEmojis/master/DiscordFreeEmojis64px.plugin.js
+ */
 
 /*@cc_on
 @if (@_jscript)
