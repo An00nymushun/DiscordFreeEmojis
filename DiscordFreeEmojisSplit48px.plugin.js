@@ -1,4 +1,11 @@
-//META{"name":"FreeEmojis"}*//
+/**
+ * @name FreeEmojis
+ * @version 1.6.1
+ * @description Link emojis if you don't have nitro! Type them out or use the emoji picker! [Split]
+ * @author An0
+ * @source https://github.com/An00nymushun/DiscordFreeEmojis
+ * @updateUrl https://raw.githubusercontent.com/An00nymushun/DiscordFreeEmojis/main/DiscordFreeEmojisSplit48px.plugin.js
+ */
 
 /*@cc_on
 @if (@_jscript)
@@ -259,12 +266,6 @@ function Stop() {
 }
 
 return function() { return {
-    getName: () => "DiscordFreeEmojis",
-    getShortName: () => "FreeEmojis",
-    getDescription: () => "Link emojis if you don't have nitro! Type them out or use the emoji picker! [Split]",
-    getVersion: () => "1.6",
-    getAuthor: () => "An0",
-
     start: Start,
     stop: Stop
 }};
