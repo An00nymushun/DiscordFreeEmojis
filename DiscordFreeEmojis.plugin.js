@@ -1,11 +1,4 @@
-/**
- * @name FreeEmojis
- * @version 1.6.1
- * @description Link emojis if you don't have nitro! Type them out or use the emoji picker!
- * @author An0
- * @source https://github.com/An00nymushun/DiscordFreeEmojis
- * @updateUrl https://raw.githubusercontent.com/An00nymushun/DiscordFreeEmojis/main/DiscordFreeEmojis.plugin.js
- */
+//META{"name":"FreeEmojis"}*//
 
 /*@cc_on
 @if (@_jscript)
@@ -95,7 +88,7 @@ var Utils = {
 var Initialized = false;
 var searchHook;
 var parseHook;
-var useEmojiSelectHandlerHook;
+var getEmojiUnavailableReasonHook;
 function Init()
 {
     Discord = { window: (typeof(unsafeWindow) !== 'undefined') ? unsafeWindow : window };
@@ -110,8 +103,8 @@ function Init()
     let messageEmojiParserModule = findModuleByUniqueProperties([ 'parse', 'parsePreprocessor', 'unparse' ]);
     if(messageEmojiParserModule == null) { Utils.Error("messageEmojiParserModule not found."); return 0; }
 
-    let emojiPickerModule = findModuleByUniqueProperties([ 'useEmojiSelectHandler' ]);
-    if(emojiPickerModule == null) { Utils.Error("emojiPickerModule not found."); return 0; }
+    let emojiPermissionsModule = findModuleByUniqueProperties([ 'getEmojiUnavailableReason' ]);
+    if(emojiPermissionsModule == null) { Utils.Error("emojiPermissionsModule not found."); return 0; }
 
     searchHook = Discord.original_searchWithoutFetchingLatest = emojisModule.searchWithoutFetchingLatest;
     emojisModule.searchWithoutFetchingLatest = function() { return searchHook.apply(this, arguments); };
@@ -119,8 +112,9 @@ function Init()
     parseHook = Discord.original_parse = messageEmojiParserModule.parse;
     messageEmojiParserModule.parse = function() { return parseHook.apply(this, arguments); };
 
-    useEmojiSelectHandlerHook = Discord.original_useEmojiSelectHandler = emojiPickerModule.useEmojiSelectHandler;
-    emojiPickerModule.useEmojiSelectHandler = function() { return useEmojiSelectHandlerHook.apply(this, arguments); };
+    getEmojiUnavailableReasonHook = Discord.original_getEmojiUnavailableReason = emojiPermissionsModule.getEmojiUnavailableReason;
+    emojiPermissionsModule.getEmojiUnavailableReason = function() { return getEmojiUnavailableReasonHook.apply(this, arguments); };
+    
 
     Utils.Log("initialized");
     Initialized = true;
@@ -131,10 +125,11 @@ function Init()
 function Start() {
     if(!Initialized && Init() !== 1) return;
 
-    const { original_parse, original_useEmojiSelectHandler } = Discord;
+    const { original_parse, original_getEmojiUnavailableReason } = Discord;
 
     searchHook = function() {
         let result = Discord.original_searchWithoutFetchingLatest.apply(this, arguments);
+        console.log({result, arguments})
         result.unlocked.push(...result.locked);
         result.locked = [];
         return result;
@@ -166,20 +161,9 @@ function Start() {
         return result;
     };
 
-    useEmojiSelectHandlerHook = function(args) {
-        const { onSelectEmoji, closePopout } = args;
-        const originalHandler = original_useEmojiSelectHandler.apply(this, arguments);
-        return function(data, state) {
-            if(state.toggleFavorite)
-                return originalHandler.apply(this, arguments);
-
-            const emoji = data.emoji;
-            if(emoji != null) {
-                onSelectEmoji(emoji, state.isFinalSelection);
-                if(state.isFinalSelection) closePopout();
-            }
-        };
-    };
+    getEmojiUnavailableReasonHook = function() {
+        return null;
+    }
 }
 
 function Stop() {
@@ -187,10 +171,16 @@ function Stop() {
 
     searchHook = Discord.original_searchWithoutFetchingLatest;
     parseHook = Discord.original_parse;
-    useEmojiSelectHandlerHook = Discord.original_useEmojiSelectHandler;
+    getEmojiUnavailableReasonHook = Discord.original_getEmojiUnavailableReason;
 }
 
 return function() { return {
+    getName: () => "DiscordFreeEmojis",
+    getShortName: () => "FreeEmojis",
+    getDescription: () => "Link emojis if you don't have nitro! Type them out or use the emoji picker!",
+    getVersion: () => "1.7",
+    getAuthor: () => "An0",
+
     start: Start,
     stop: Stop
 }};
