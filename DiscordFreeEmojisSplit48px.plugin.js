@@ -159,7 +159,13 @@ function Start() {
     }
 
     function replaceEmoji(parseResult, emoji) {
-        parseResult.content = parseResult.content.replace(`<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`, emoji.url.split("?")[0] + "?size=48");
+        let sliceIndex = -5;
+        let currentEmojiFormat = ".png"
+        if (emoji.url.split("?")[0].slice(sliceIndex, sliceIndex + 1) != ".") {
+            sliceIndex = -4;
+            currentEmojiFormat = ".gif"
+        }
+        parseResult.content = parseResult.content.replace(`<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`, emoji.url.split("?")[0].slice(0, sliceIndex) + currentEmojiFormat + "?size=48&quality=lossless");
     }
 
     parseHook = function() {
