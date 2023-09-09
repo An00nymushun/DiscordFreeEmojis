@@ -192,7 +192,7 @@ function Init(nonInvasive)
         let result = original_parse.apply(this, arguments);
         if(result.invalidEmojis.length !== 0) {
             for(let emoji of result.invalidEmojis) {
-                result.content = result.content.replace(`<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`, emoji.url.split("?")[0] + "?size=64");
+                result.content = result.content.replace(`<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`, `[~](${emoji.url.split("?")[0]}?size=64)`);
             }
             result.invalidEmojis = [];
         }
