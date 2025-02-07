@@ -143,7 +143,8 @@ function Start() {
     }
 
     function replaceEmoji(parseResult, emoji) {
-        parseResult.content = parseResult.content.replace(`<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`, emoji.url.split("?")[0] + "?size=48");
+        const emojiUrl = `https://cdn.discordapp.com/emojis/${emoji.id}.${emoji.animated ? "gif" : "webp"}?size=48`; 
+        parseResult.content = parseResult.content.replace(`<${emoji.animated ? "a" : ""}:${emoji.originalName || emoji.name}:${emoji.id}>`, emojiUrl);
     }
 
     parseHook = function() {
@@ -167,10 +168,6 @@ function Start() {
 
         return result;
     };
-
-    getEmojiUnavailableReasonHook = function() {
-        return null;
-    }
 }
 
 function Stop() {
